@@ -1,0 +1,52 @@
+batchsize: 16  #32
+epoch: 4000
+seed: 0
+snapshot_interval: 200 #2000
+display_interval: 100  #32,2000,0,5000,100 is default
+
+models:
+  frame_seed_generator:
+    fn: models/frame_seed_generator.py
+    name: FrameSeedGeneratorNoBetaInitUniform
+    args:
+      n_frames: 32 #16
+      z_slow_dim: 100 #100
+      z_fast_dim: 100 #100
+      wscale: 0.01  #0.01
+
+  video_generator:
+    fn: models/video_generator.py
+    name: VideoGeneratorConditionalInitUniform #VideoGeneratorInitUniform
+    args:
+      z_slow_dim: 100 #100
+      z_fast_dim: 100 #100
+      out_channels: 1
+      bottom_width: 4 #4
+      conv_ch: 512 #512
+      wscale: 0.01 #0.01
+
+  video_discriminator:
+      fn: models/video_discriminator.py
+      name: VideoDiscriminatorConditionalNoBetaInitUniform #VideoDiscriminatorNoBetaInitUniform
+      args:
+        in_channels: 2
+        top_width: 4  #4
+        mid_ch: 64 #64
+        wscale: 0.01 #0.01
+
+dataset:
+  dataset_fn: datasets/mnist_dataset.py
+  dataset_name: MovingMNISTDataset
+  args:
+    n_frames: 32 #16
+    dataset_path: data/mnist_test_2ch.npy #data/mnist_test_seq.npy
+
+updater:
+  fn: updaters/tgan_updater_wgan.py
+  name: TGANUpdaterWGANParallelSVC
+  args:
+    freq: 1  #5
+
+
+#try reducing/increasing batch size
+#Try reducing/increasing wscale w/ batch size
