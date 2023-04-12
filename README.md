@@ -1,18 +1,17 @@
+3-D PET Image Generation using TrGAN
+====================================
+This repository contains code used to generate synthetic 3-D Head and Neck PET images using Transversal GAN as seen in the following papers:
+
+[3-D PET Image Generation with tumour masks using TGAN](https://arxiv.org/abs/2111.01866)
+
+[Assessing Privacy Leakage in Synthetic 3-D PET Imaging using Transversal GAN](https://arxiv.org/abs/2206.06448)
+
 Temporal Generative Adversarial Nets
 ====================================
-
-**The new version of TGAN has been published and the code is available: [TGANv2](https://github.com/pfnet-research/tgan2).**
-
-This repository contains a collection of scripts used in the experiments of
+This repository is based on TGAN:
 [Temporal Generative Adversarial Nets with Singular Value Clipping](https://arxiv.org/abs/1611.06624).
 
-Disclaimer: PFN provides no warranty or support for this implementation. Use it at your own risk. See [license](LICENSE.md) for details.
-
-## Results
-
-![](https://raw.githubusercontent.com/wiki/pfnet-research/tgan/images/ucf_cond_scaled.gif)
-
-## Requirements
+## TGAN Requirements
 
 These scripts require the following python libraries.
 
@@ -29,68 +28,37 @@ Note that they also require ffmpeg to produce a video from a set of images.
 ## Usage
 
 ### Datasets
+These scripts have been tested on the [HECKTOR 2020 dataset](https://www.aicrowd.com/challenges/miccai-2020-hecktor). 
 
-In order to run our scripts, you need to prepare MovingMNIST and UCF-101 datasets as follows.
+In order to run the scripts, the dataset needs to be stored in .npy format in `/data`. The data should be 4-D (3 spatial dim and one channel dim) for unconditional generation and 5-D for conditional generation (image and mask are concatenated along 5th dimension).
 
-#### MovingMNIST
-
-1. Download `mnist_test_seq.npy` from [here](http://www.cs.toronto.edu/~nitish/unsupervised_video/).
-2. Put it on `path-to-tgans/data/mnist_test_seq.npy`.
-
-#### UCF-101
-
-There are two ways to create an UCF-101 dataset for this script.
-
-1. Transforms all the videos in the UCF-101 dataset to the images.
-2. Resizes these images to the appropriate resolution, and concatenate
-   them into as single hdf5 format represented as (time, channel, rows, cols).
-   In this transformation we used ``make_ucf101.py`` in this repository.
-   Note that this script also produces a config file that describes videos and
-   these corresponding label information.
-3. puts them on `path-to-tgans/data`.
-
-Another way is to simply download these files; please download them from
-[this url](https://www.dropbox.com/sh/j9fsakeuvicpeo8/AAD6BVhbZRyi7NXaMfn6TO4da?dl=0),
-and put them on the same directory.
+We cropped our datasets centered on the bounding boxes included in the HECKTOR 2020 dataset. The code was only tested on sizes `64x64x64` and `64x64x32` due to memory constraints.
 
 ### Training
 
-#### TGAN with WGAN and Singular Value Clipping
-
+#### TrGAN with WGAN and Singular Value Clipping
+There are a few configuration options in the original TGAN paper but only WGAN with SVD is tested for TrGAN PET image generation:
 ```
-python train.py --config_path configs/moving_mnist/mnist_wgan_svd_zdim-100_no-beta-all_init-uniform-all.yml --gpu 0
-python train.py --config_path configs/ucf101/ucf101_wgan_svd_zdim-100_no-beta.yml --gpu 0
-```
-
-#### TGAN (WGAN and weight clipping)
-
-```
-python train.py --config_path configs/moving_mnist/mnist_wgan_clip_zdim-100_no-beta-all_init-uniform-all.yml --gpu 0
-python train.py --config_path configs/ucf101/ucf101_wgan_clip_zdim-100_no-beta.yml --gpu 0
+python train.py --config_path configs/hecktor/hecktor_wgan_svd_zdim-100_no-beta-all_init-uniform-all.yml --gpu 0
 ```
 
-#### TGAN (vanilla GAN)
-
+### Inference
+``` 
+python infer.py
 ```
-python train.py --config_path configs/ucf101/ucf101_vanilla_zdim-100_no-beta.yml --gpu 0
-```
+Alternatively, see the jupyter notebook for visualization of results.
 
-## Quantitative evaluation on UCF101 (2019/08/20)
-
-We have uploaded ``mean2.npz`` on GitHub because there are many inquiries about the mean file in the UCF101.
-If you want to perform a quantitative evaluation, please download it from
-[this url](https://github.com/pfnet-research/tgan/releases/download/v1.0.0/mean2.npz).
 
 ## Citation
 
-Please cite the paper if you are interested in:
+Please cite these papers if you use our work:
 
 ```
-@inproceedings{TGAN2017,
-    author = {Saito, Masaki and Matsumoto, Eiichi and Saito, Shunta},
-    title = {Temporal Generative Adversarial Nets with Singular Value Clipping},
-    booktitle = {ICCV},
-    year = {2017},
+@inproceedings{SPIE2022,
+    author = {Bergen, R and Rajotte, J-F and Yousefirizi, F and Klyuzhin, IS and Rahmim, A and Ng RT},
+    title = {3-D PET Image Generation with tumour masks using TGAN},
+    booktitle = {SPIE},
+    year = {2022},
 }
 ```
 
