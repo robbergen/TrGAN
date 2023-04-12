@@ -51,7 +51,7 @@ Alternatively, see the jupyter notebook for visualization of results.
 
 ## Citation
 
-Please cite these papers if you use our work:
+Please cite this papers if you use our work:
 
 ```
 @inproceedings{SPIE2022,
