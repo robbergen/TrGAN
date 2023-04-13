@@ -30,7 +30,7 @@ Note that they also require ffmpeg to produce a video from a set of images.
 ### Datasets
 These scripts have been tested on the [HECKTOR 2020 dataset](https://www.aicrowd.com/challenges/miccai-2020-hecktor). 
 
-In order to run the scripts, the dataset needs to be stored in .npy format in `/data`. The data should be 4-D (3 spatial dim and one channel dim) for unconditional generation and 5-D for conditional generation (image and mask are concatenated along 5th dimension).
+In order to run the scripts, the dataset needs to be stored in .npy format in `/data`. The data should be 4-D (3 spatial dim and one channel dim) for unconditional generation and 5-D for conditional generation (image and binary mask are concatenated along 5th dimension).
 
 We cropped our datasets centered on the bounding boxes included in the HECKTOR 2020 dataset. The code was only tested on sizes `64x64x64` and `64x64x32` due to memory constraints.
 
@@ -46,7 +46,7 @@ python train.py --config_path configs/hecktor/hecktor_wgan_svd_zdim-100_no-beta-
 ``` 
 python infer.py
 ```
-Alternatively, see the jupyter notebook for visualization of results.
+See the jupyter notebook for visualizations of results using a 3D-Viewer.
 
 
 ## Citation
