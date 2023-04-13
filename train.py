@@ -9,6 +9,7 @@ import os
 import shutil
 import sys
 import time
+import numpy as np
 
 import chainer
 import yaml
@@ -62,7 +63,6 @@ def load_models(config):
     vgen_conf = config.models['video_generator']
     vgen = load_model(vgen_conf['fn'], vgen_conf['name'], vgen_conf['args'])
     vdis_conf = config.models['video_discriminator']
-    print(vdis_conf)
     vdis = load_model(vdis_conf['fn'], vdis_conf['name'], vdis_conf['args'])
     return fsgen, vgen, vdis
 
@@ -98,7 +98,6 @@ def create_result_dir(config_path, config):
         config.updater['fn'], config.result_dir)
     return config.result_dir
 
-import numpy as np
 
 def main():
     parser = argparse.ArgumentParser()
@@ -109,7 +108,6 @@ def main():
 
     config = Config(yaml.load(open(args.config_path)))
     dataset = load_dataset(config)
-    #data set is right size here
     fsgen, vgen, vdis = load_models(config)
 
     if args.gpu >= 0:
@@ -118,7 +116,7 @@ def main():
         vgen.to_gpu()
         vdis.to_gpu()
 
-    def make_optimizer(model, alpha=0.00005, beta1=0.5): #alpha=0.00005, beta1=0.5
+    def make_optimizer(model, alpha=0.00003, beta1=0.4): #alpha=0.00005, beta1=0.5
         optimizer = chainer.optimizers.RMSprop(lr=alpha)
         optimizer.setup(model)
         return optimizer
@@ -136,7 +134,6 @@ def main():
         'optimizer': {'fsgen': opt_fsgen, 'vgen': opt_vgen, 'vdis': opt_vdis},
         'device': args.gpu
     })
-
     updater = updater(**kwargs)
     out = create_result_dir(args.config_path, config) if not args.test else 'results/test'
     print(out)
@@ -173,16 +170,17 @@ def main():
     trainer.extend(extensions.PlotReport(
         ['vdis/loss_dis'], trigger=display_interval, file_name='loss_dis.png'),
         trigger=display_interval)
+
     # Save movie
 
     cond = updater.get_iterator('main').next()
-    cond = fsgen.xp.array(cond, dtype=np.float32).transpose(0, 2, 1, 3, 4)
+    cond = fsgen.xp.array(cond, dtype=np.float32).transpose(0,2,1,3,4)
     #Batch shape is (batchsize, channels, n_frames, xres,yres)
-    cond = chainer.Variable(np.expand_dims(cond[:, 1, :, :, :], 1)) #Conditions
+    cond = chainer.Variable(np.expand_dims(cond[:,1,:,:,:],1))
 
     trainer.extend(
         #out_generated_movie(fsgen, vgen, vdis, 100, 32, config.seed, out), #fsgen, vgen, vdis, 100, 16, config.seed, out
-        out_generated_movie(fsgen, vgen, vdis, cond, 100, 32, config.seed, out),
+         out_generated_movie(fsgen, vgen, vdis, cond, 100, 32, config.seed, out), #fsgen, vgen, vdis, 100, 16, config.seed, out
         trigger=snapshot_interval)
 
     # Resume from a snapshot
@@ -191,6 +189,7 @@ def main():
 
     # Run the training
     trainer.run()
+
     return 0
 
 if __name__ == '__main__':

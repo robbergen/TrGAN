@@ -37,7 +37,6 @@ def make_video(fsgen, vgen, n, z_slow=None, z_fast=None):
 
     return y, z_slow, z_fast
 
-##########ROB#############
 def make_conditional_video(fsgen, vgen, n, cond, z_slow=None, z_fast=None):
     xp = fsgen.xp
 
@@ -54,9 +53,22 @@ def make_conditional_video(fsgen, vgen, n, cond, z_slow=None, z_fast=None):
 
         z_slow = chainer.cuda.to_cpu(z_slow.data)
         z_fast = chainer.cuda.to_cpu(z_fast.data)
-
     return y, z_slow, z_fast
-##########################
+
+def vgen_forward_cond(vgen, z_slow, z_fast,cond):
+    B, n_z_fast, n_frames = z_fast.shape
+    z_fast = F.reshape(F.transpose(
+        z_fast, [0, 2, 1]), (B * n_frames, n_z_fast))
+
+    B, n_z_slow = z_slow.shape
+    z_slow = F.reshape(F.broadcast_to(F.reshape(
+        z_slow, (B, 1, n_z_slow)), (B, n_frames, n_z_slow)),
+        (B * n_frames, n_z_slow))
+
+    with chainer.using_config('train', False):
+        img_fake = vgen(z_slow, z_fast,cond)
+    return chainer.cuda.to_cpu(img_fake.data)
+
 
 def vgen_forward(vgen, z_slow, z_fast):
     B, n_z_fast, n_frames = z_fast.shape
@@ -72,21 +84,6 @@ def vgen_forward(vgen, z_slow, z_fast):
         img_fake = vgen(z_slow, z_fast)
     return chainer.cuda.to_cpu(img_fake.data)
 
-##########ROB#############
-def vgen_forward_cond(vgen, z_slow, z_fast,cond):
-    B, n_z_fast, n_frames = z_fast.shape
-    z_fast = F.reshape(F.transpose(
-        z_fast, [0, 2, 1]), (B * n_frames, n_z_fast))
-
-    B, n_z_slow = z_slow.shape
-    z_slow = F.reshape(F.broadcast_to(F.reshape(
-        z_slow, (B, 1, n_z_slow)), (B, n_frames, n_z_slow)),
-        (B * n_frames, n_z_slow))
-
-    with chainer.using_config('train', False):
-        img_fake = vgen(z_slow, z_fast,cond)
-    return chainer.cuda.to_cpu(img_fake.data)
-##########################
 
 def load_model(result_dir, config, model_type, snapshot_path=None):
     model_fn = '{}/{}'.format(result_dir, os.path.basename(config['models'][model_type]['fn']))

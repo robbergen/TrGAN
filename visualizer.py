@@ -11,55 +11,55 @@ from PIL import Image
 
 
 # def out_generated_movie(fsgen, vgen, vdis, rows, cols, seed, dst):
-#     @chainer.training.make_extension()
-#     def make_image(trainer):
-#         np.random.seed(seed)
-#         xp = fsgen.xp
-#
-#         with chainer.using_config('train', False) and \
-#                 chainer.no_backprop_mode():
-#             z_slow = xp.random.uniform(
-#                 -1, 1, (rows, fsgen.z_slow_dim)).astype('f')
-#             z_slow = Variable(z_slow)
-#
-#             z_fast = fsgen(z_slow)
-#             B, n_z_fast, n_frames = z_fast.shape
-#             z_fast = F.reshape(F.transpose(
-#                 z_fast, [0, 2, 1]), (B * n_frames, n_z_fast))
-#
-#             B, n_z_slow = z_slow.shape
-#             z_slow = F.reshape(F.broadcast_to(F.reshape(
-#                 z_slow, (B, 1, n_z_slow)), (B, n_frames, n_z_slow)),
-#                 (B * n_frames, n_z_slow))
-#
-#             img_fake = vgen(z_slow, z_fast) #need to add cond here somehow
-#
-#         x = chainer.cuda.to_cpu(img_fake.data)
-#
-#         def save_image(x, name, mode=None):
-#             _, C, H, W = x.shape
-#             x = x.reshape((rows, cols, C, H, W))
-#             x = x.transpose(0, 3, 1, 4, 2)
-#             if C == 1:
-#                 x = x.reshape((rows * H, cols * W))
-#             else:
-#                 x = x.reshape((rows * H, cols * W, C))
-#
-#             preview_dir = '{}/preview'.format(dst)
-#             preview_path = preview_dir +\
-#                 '/image_{}_{:0>8}.png'.format(name, trainer.updater.iteration)
-#             if not os.path.exists(preview_dir):
-#                 os.makedirs(preview_dir)
-#             Image.fromarray(x, mode=mode).convert('RGB').save(preview_path)
-#
-#         x = np.asarray(x * 127 + 127, dtype=np.uint8)
-#         save_image(x, "img")
-#         _, C, H, W = x.shape
-#         x = x.transpose(0, 2, 3, 1)  # N, H, W, C
-#         save_mov(
-#             x, rows, cols, H, W, C,
-#             '{}/preview/video_{:0>8}.avi'.format(dst, trainer.updater.iteration))
-#     return make_image
+    # @chainer.training.make_extension()
+    # def make_image(trainer):
+    #     np.random.seed(seed)
+    #     xp = fsgen.xp
+
+    #     with chainer.using_config('train', False) and \
+    #             chainer.no_backprop_mode():
+    #         z_slow = xp.random.uniform(
+    #             -1, 1, (rows, fsgen.z_slow_dim)).astype('f')
+    #         z_slow = Variable(z_slow)
+
+    #         z_fast = fsgen(z_slow)
+    #         B, n_z_fast, n_frames = z_fast.shape
+    #         z_fast = F.reshape(F.transpose(
+    #             z_fast, [0, 2, 1]), (B * n_frames, n_z_fast))
+
+    #         B, n_z_slow = z_slow.shape
+    #         z_slow = F.reshape(F.broadcast_to(F.reshape(
+    #             z_slow, (B, 1, n_z_slow)), (B, n_frames, n_z_slow)),
+    #             (B * n_frames, n_z_slow))
+
+    #         img_fake = vgen(z_slow, z_fast)
+
+    #     x = chainer.cuda.to_cpu(img_fake.data)
+
+    #     def save_image(x, name, mode=None):
+    #         _, C, H, W = x.shape
+    #         x = x.reshape((rows, cols, C, H, W))
+    #         x = x.transpose(0, 3, 1, 4, 2)
+    #         if C == 1:
+    #             x = x.reshape((rows * H, cols * W))
+    #         else:
+    #             x = x.reshape((rows * H, cols * W, C))
+
+    #         preview_dir = '{}/preview'.format(dst)
+    #         preview_path = preview_dir +\
+    #             '/image_{}_{:0>8}.png'.format(name, trainer.updater.iteration)
+    #         if not os.path.exists(preview_dir):
+    #             os.makedirs(preview_dir)
+    #         Image.fromarray(x, mode=mode).convert('RGB').save(preview_path)
+
+    #     x = np.asarray(x * 127 + 127, dtype=np.uint8)
+    #     save_image(x, "img")
+    #     _, C, H, W = x.shape
+    #     x = x.transpose(0, 2, 3, 1)  # N, H, W, C
+    #     save_mov(
+    #         x, rows, cols, H, W, C,
+    #         '{}/preview/video_{:0>8}.avi'.format(dst, trainer.updater.iteration))
+    # return make_image
 
 def out_generated_movie(fsgen, vgen, vdis, cond, rows, cols, seed, dst):
     @chainer.training.make_extension()
@@ -83,7 +83,7 @@ def out_generated_movie(fsgen, vgen, vdis, cond, rows, cols, seed, dst):
                 z_slow, (B, 1, n_z_slow)), (B, n_frames, n_z_slow)),
                 (B * n_frames, n_z_slow))
 
-            img_fake = vgen(z_slow, z_fast, cond) #need to add cond here somehow
+            img_fake = vgen(z_slow, z_fast,cond)
 
         x = chainer.cuda.to_cpu(img_fake.data)
 
